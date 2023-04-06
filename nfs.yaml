@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nfs-provisioner
+  labels:
+    name: nfs-provisioner
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: nfs
+  namespace: nfs-provisioner
+spec:
+  chart: nfs-subdir-external-provisioner
+  repo: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+  targetNamespace: nfs-provisioner
+  set:
+    nfs.server: 172.16.27.58
+    nfs.path: /mnt/nfs_test/k8s/demo_app
+    storageClass.name: nfs
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-app
+provisioner: cluster.local/nfs-nfs-subdir-external-provisioner
+parameters:
+  onDelete: "retain"
+  pathPattern: "/app01/"
